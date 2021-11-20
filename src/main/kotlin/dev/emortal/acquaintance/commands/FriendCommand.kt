@@ -128,7 +128,7 @@ object FriendCommand : Kommand({
                 val playingGame = itPlayer.game?.gameTypeInfo?.gameName
 
                 listComponent.append(
-                    Component.text(" (playing ${playingGame})", NamedTextColor.GRAY)
+                    Component.text(" (playing ${playingGame})", NamedTextColor.DARK_GRAY)
                 )
             }
 

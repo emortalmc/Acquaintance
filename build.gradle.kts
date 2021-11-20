@@ -83,3 +83,15 @@ tasks.withType<KotlinCompile> { kotlinOptions.jvmTarget = "17" }
 compileKotlin.kotlinOptions {
     freeCompilerArgs = listOf("-Xinline-classes")
 }
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = project.properties["group"] as? String?
+            artifactId = project.name
+            version = project.properties["version"] as? String?
+
+            from(components["java"])
+        }
+    }
+}
