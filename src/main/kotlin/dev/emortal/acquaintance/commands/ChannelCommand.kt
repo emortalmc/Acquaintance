@@ -1,6 +1,7 @@
 package dev.emortal.acquaintance.commands
 
 import dev.emortal.acquaintance.RelationshipManager.channel
+import dev.emortal.acquaintance.RelationshipManager.errorColor
 import dev.emortal.acquaintance.RelationshipManager.party
 import dev.emortal.acquaintance.channel.ChatChannel
 import net.kyori.adventure.text.Component
@@ -25,7 +26,7 @@ object ChannelCommand : Kommand({
     syntax(channel) {
         val chatChannelEnum = ChatChannel.valueOf(!channel)
         if (chatChannelEnum == ChatChannel.PARTY && player.party == null) {
-            player.sendMessage(Component.text("You are not in a party", NamedTextColor.RED))
+            player.sendMessage(Component.text("You are not in a party", errorColor))
             return@syntax
         }
 

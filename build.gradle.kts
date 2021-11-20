@@ -39,7 +39,7 @@ dependencies {
 
     // Compile Minestom into project
     compileOnly("com.github.Minestom:Minestom:5734097789")
-    compileOnly("com.github.EmortalMC:Immortal:cd8a42d748")
+    compileOnly("com.github.EmortalMC:Immortal:2f5c7d0a1a")
 
     //implementation("redis.clients:jedis:3.7.0")
     implementation("mysql:mysql-connector-java:8.0.27")

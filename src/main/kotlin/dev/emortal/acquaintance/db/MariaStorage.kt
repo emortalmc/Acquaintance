@@ -17,6 +17,7 @@ class MariaStorage : Storage() {
         val statement =
             connection.prepareStatement("CREATE TABLE IF NOT EXISTS friends (`playerA` BINARY(16), `playerB` BINARY(16))")
         statement.executeUpdate()
+        statement.close()
     }
 
     override fun addFriend(player: UUID, friend: UUID) {
@@ -56,14 +57,17 @@ class MariaStorage : Storage() {
     }
 
     override fun getFriends(player: UUID): List<UUID> {
-        val statement = connection.prepareStatement("SELECT playerA, playerB FROM friends WHERE playerA=?")
+        val statement = connection.prepareStatement("SELECT playerB FROM friends WHERE playerA=?")
+        statement.setBinaryStream(1, player.toInputStream())
 
         val results = statement.executeQuery()
 
         val uuidList = mutableListOf<UUID>()
         while (results.next()) {
-            results.getBinaryStream(2).toUUID()?.let { uuidList.add(it) }
+            results.getBinaryStream(1).toUUID()?.let { uuidList.add(it) }
         }
+        statement.close()
+        results.close()
         return uuidList
     }
 
