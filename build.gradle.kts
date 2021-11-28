@@ -38,14 +38,14 @@ dependencies {
     compileOnly(kotlin("reflect"))
 
     // Compile Minestom into project
-    compileOnly("com.github.Minestom:Minestom:5734097789")
-    compileOnly("com.github.EmortalMC:Immortal:2f5c7d0a1a")
+    compileOnly("com.github.Minestom:Minestom:e53c0a68fb")
+    compileOnly("com.github.EmortalMC:Immortal:37d9d50ec8")
 
     //implementation("redis.clients:jedis:3.7.0")
     implementation("mysql:mysql-connector-java:8.0.27")
 
     // import kotlinx serialization
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
 }
 
 // Take gradle.properties and apply it to resources.

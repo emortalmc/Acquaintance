@@ -8,9 +8,10 @@ import dev.emortal.acquaintance.channel.ChatChannel
 import dev.emortal.acquaintance.commands.ChannelCommand
 import dev.emortal.acquaintance.commands.FriendCommand
 import dev.emortal.acquaintance.commands.PartyCommand
-import dev.emortal.acquaintance.config.ConfigurationHelper
 import dev.emortal.acquaintance.db.MariaStorage
 import dev.emortal.acquaintance.db.Storage
+import dev.emortal.immortal.config.ConfigHelper
+import dev.emortal.immortal.config.ConfigHelper.noPrettyPrintFormat
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -38,7 +39,7 @@ class AcquaintanceExtension : Extension() {
     }
 
     override fun initialize() {
-        playerCache = ConfigurationHelper.initConfigFile(playerCacheConfigPath, playerCache)
+        playerCache = ConfigHelper.initConfigFile(playerCacheConfigPath, playerCache, noPrettyPrintFormat)
 
         eventNode.listenOnly<PlayerLoginEvent> {
             Audience.audience(storage.getFriends(player.uuid).mapNotNull { Manager.connection.getPlayer(it) })
@@ -51,7 +52,7 @@ class AcquaintanceExtension : Extension() {
 
             if (playerCache[player.uuid.toString()] == player.username) return@listenOnly
             playerCache[player.uuid.toString()] = player.username
-            ConfigurationHelper.writeObjectToPath(playerCacheConfigPath, playerCache)
+            ConfigHelper.writeObjectToPath(playerCacheConfigPath, playerCache, noPrettyPrintFormat)
         }
 
         eventNode.listenOnly<PlayerDisconnectEvent> {
