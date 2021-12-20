@@ -2,10 +2,13 @@ package dev.emortal.acquaintance.db
 
 import com.google.common.io.ByteStreams
 import com.mysql.cj.jdbc.Driver
+import dev.emortal.acquaintance.AcquaintanceExtension
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
+import java.net.URLEncoder
 import java.nio.ByteBuffer
+import java.nio.charset.StandardCharsets
 import java.sql.Connection
 import java.sql.DriverManager
 import java.util.*
@@ -74,11 +77,14 @@ class MariaStorage : Storage() {
     override fun createConnection(): Connection {
         Driver()
 
-        val dbName = "s7_friends"
-        val dbUsername = "u7_eeFphQHpOy"
-        val dbPassword = "x6zZQR1hra8Qm^q1wK!AT3hJ"
+        val dbConfig = AcquaintanceExtension.databaseConfig
 
-        return DriverManager.getConnection("jdbc:mysql://172.17.0.1:3306/${dbName}?user=${dbUsername}&password=${dbPassword}&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true")
+        val dbName = URLEncoder.encode(dbConfig.tableName, StandardCharsets.UTF_8.toString())
+        val dbUsername = URLEncoder.encode(dbConfig.username, StandardCharsets.UTF_8.toString())
+        val dbPassword = URLEncoder.encode(dbConfig.password, StandardCharsets.UTF_8.toString())
+
+        //172.17.0.1
+        return DriverManager.getConnection("jdbc:mysql://${dbConfig.address}:${dbConfig.port}/${dbName}?user=${dbUsername}&password=${dbPassword}&useUnicode=true&characterEncoding=UTF-8")
     }
 
     fun UUID.toInputStream(): InputStream {

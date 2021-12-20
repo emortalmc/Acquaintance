@@ -73,12 +73,16 @@ object FriendCommand : Kommand({
     }
 
     syntax(remove, user) {
-        val userPlayer = Manager.connection.getPlayer((!user))
+        val userPlayer = Manager.connection.getPlayer(!user)
+        if (userPlayer == null) {
+            player.sendMessage(Component.text("That player is not online", errorColor))
+            return@syntax
+        }
 
-        val friends = AcquaintanceExtension.storage.getFriends(player.uuid)
+        val friends = AcquaintanceExtension.storage!!.getFriends(player.uuid)
 
         val playerToRemove = friends.firstOrNull {
-            it == userPlayer?.uuid || AcquaintanceExtension.playerCache[it.toString()].contentEquals(!user, true)
+            it == userPlayer.uuid || AcquaintanceExtension.playerCache[it.toString()].contentEquals(!user, true)
         }
 
         if (playerToRemove == null) {
@@ -174,7 +178,7 @@ object FriendCommand : Kommand({
             return@syntax
         }
 
-        if (AcquaintanceExtension.storage.getFriends(player.uuid).contains(user.uuid)) {
+        if (AcquaintanceExtension.storage!!.getFriends(player.uuid).contains(user.uuid)) {
             player.sendMessage(Component.text("You are already friends with '${user.username}'", errorColor))
             return@syntax
         }

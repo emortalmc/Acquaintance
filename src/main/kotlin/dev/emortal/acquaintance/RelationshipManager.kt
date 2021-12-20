@@ -42,7 +42,7 @@ object RelationshipManager {
     val Player.party
         get() = partyMap[this]
     val Player.friends
-        get() = friendCache[uuid] ?: AcquaintanceExtension.storage.getFriends(uuid)
+        get() = friendCache[uuid] ?: AcquaintanceExtension.storage!!.getFriends(uuid)
 
     fun Player.inviteToParty(player: Player) {
         if (partyInviteMap[player]?.contains(this) == true) {
@@ -157,7 +157,7 @@ object RelationshipManager {
 
         friendRequestMap[this]!!.remove(player)
 
-        AcquaintanceExtension.storage.addFriend(this.uuid, player.uuid)
+        AcquaintanceExtension.storage!!.addFriend(this.uuid, player.uuid)
         friendCache[this.uuid]!!.add(player.uuid)
 
         this.sendMessage(
@@ -175,12 +175,12 @@ object RelationshipManager {
     }
 
     fun UUID.removeFriend(uuid: UUID) {
-        AcquaintanceExtension.storage.removeFriend(this, uuid)
+        AcquaintanceExtension.storage!!.removeFriend(this, uuid)
         friendCache[this]!!.remove(uuid)
     }
 
     fun Player.removeFriend(player: Player) {
-        AcquaintanceExtension.storage.removeFriend(this.uuid, player.uuid)
+        AcquaintanceExtension.storage!!.removeFriend(this.uuid, player.uuid)
         friendCache[this.uuid]!!.remove(player.uuid)
     }
 

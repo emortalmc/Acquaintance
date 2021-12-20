@@ -8,21 +8,29 @@ import dev.emortal.acquaintance.channel.ChatChannel
 import dev.emortal.acquaintance.commands.ChannelCommand
 import dev.emortal.acquaintance.commands.FriendCommand
 import dev.emortal.acquaintance.commands.PartyCommand
+import dev.emortal.acquaintance.config.DatabaseConfig
 import dev.emortal.acquaintance.db.MariaStorage
 import dev.emortal.acquaintance.db.Storage
 import dev.emortal.immortal.config.ConfigHelper
 import dev.emortal.immortal.config.ConfigHelper.noPrettyPrintFormat
 import net.kyori.adventure.audience.Audience
+import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.minestom.server.entity.Entity
+import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.Player
+import net.minestom.server.entity.metadata.other.AreaEffectCloudMeta
 import net.minestom.server.event.player.PlayerChatEvent
 import net.minestom.server.event.player.PlayerDisconnectEvent
 import net.minestom.server.event.player.PlayerLoginEvent
 import net.minestom.server.event.player.PlayerSpawnEvent
 import net.minestom.server.extensions.Extension
+import net.minestom.server.sound.SoundEvent
 import net.minestom.server.timer.Task
+import org.slf4j.LoggerFactory
 import world.cepi.kstom.Manager
+import world.cepi.kstom.adventure.asMini
 import world.cepi.kstom.event.listenOnly
 import java.nio.file.Path
 import java.time.Duration
@@ -32,7 +40,14 @@ class AcquaintanceExtension : Extension() {
 
     companion object {
         val leavingTasks = ConcurrentHashMap<Player, Task>()
-        val storage: Storage = MariaStorage()
+        var storage: Storage? = null
+
+        val chatLogger = LoggerFactory.getLogger("Chat")
+
+        val chatHologramMap = hashMapOf<Player, Pair<Entity, Task>>()
+
+        var databaseConfig = DatabaseConfig()
+        val databaseConfigPath = Path.of("./acquaintance.json")
 
         var playerCache = hashMapOf<String, String>()
         val playerCacheConfigPath = Path.of("./playerCache.json")
@@ -40,32 +55,45 @@ class AcquaintanceExtension : Extension() {
 
     override fun initialize() {
         playerCache = ConfigHelper.initConfigFile(playerCacheConfigPath, playerCache, noPrettyPrintFormat)
+        databaseConfig = ConfigHelper.initConfigFile(databaseConfigPath, databaseConfig)
+
+        if (databaseConfig.enabled) {
+            storage = MariaStorage()
+        }
 
         eventNode.listenOnly<PlayerLoginEvent> {
-            Audience.audience(storage.getFriends(player.uuid).mapNotNull { Manager.connection.getPlayer(it) })
-                .sendMessage(
-                    Component.text()
-                        .append(friendPrefix)
-                        .append(Component.text(player.username, NamedTextColor.GREEN))
-                        .append(Component.text(" joined the server", NamedTextColor.GRAY))
-                )
+            if (databaseConfig.enabled) {
+                Audience.audience(storage!!.getFriends(player.uuid).mapNotNull { Manager.connection.getPlayer(it) })
+                    .sendMessage(
+                        Component.text()
+                            .append(friendPrefix)
+                            .append(Component.text(player.username, NamedTextColor.GREEN))
+                            .append(Component.text(" joined the server", NamedTextColor.GRAY))
+                    )
+            }
+
+            leavingTasks[player]?.cancel()
+            leavingTasks.remove(player)
 
             if (playerCache[player.uuid.toString()] == player.username) return@listenOnly
             playerCache[player.uuid.toString()] = player.username
             ConfigHelper.writeObjectToPath(playerCacheConfigPath, playerCache, noPrettyPrintFormat)
+
         }
 
         eventNode.listenOnly<PlayerDisconnectEvent> {
             RelationshipManager.partyInviteMap.remove(player)
             RelationshipManager.friendRequestMap.remove(player)
 
-            Audience.audience(storage.getFriends(player.uuid).mapNotNull { Manager.connection.getPlayer(it) })
-                .sendMessage(
-                    Component.text()
-                        .append(friendPrefix)
-                        .append(Component.text(player.username, NamedTextColor.RED))
-                        .append(Component.text(" left the server", NamedTextColor.GRAY))
-                )
+            if (databaseConfig.enabled) {
+                Audience.audience(storage!!.getFriends(player.uuid).mapNotNull { Manager.connection.getPlayer(it) })
+                    .sendMessage(
+                        Component.text()
+                            .append(friendPrefix)
+                            .append(Component.text(player.username, NamedTextColor.RED))
+                            .append(Component.text(" left the server", NamedTextColor.GRAY))
+                    )
+            }
         }
 
         eventNode.listenOnly<PlayerSpawnEvent> {
@@ -78,8 +106,9 @@ class AcquaintanceExtension : Extension() {
         eventNode.listenOnly<PlayerChatEvent> {
             setChatFormat {
                 Component.text()
-                    .append(Component.text("${player.username}: ", NamedTextColor.WHITE))
-                    .append(Component.text(message, NamedTextColor.GRAY))
+                    .append(player.displayName!!)
+                    .append(Component.text(": "))
+                    .append(Component.text(message))
                     .build()
             }
 
@@ -92,6 +121,7 @@ class AcquaintanceExtension : Extension() {
                         )
                     )
 
+                    isCancelled = true
                     player.channel = ChatChannel.GLOBAL
                     return@listenOnly
                 }
@@ -102,10 +132,37 @@ class AcquaintanceExtension : Extension() {
                 setChatFormat {
                     Component.text()
                         .append(partyPrefix)
-                        .append(Component.text("${player.username}: ", NamedTextColor.WHITE))
-                        .append(Component.text(message, NamedTextColor.GRAY))
+                        .append(player.displayName!!)
+                        .append(Component.text(": "))
+                        .append(Component.text(message))
                         .build()
                 }
+            }
+
+            chatHologramMap[player]?.first?.remove()
+            chatHologramMap[player]?.second?.cancel()
+
+            val entity = Entity(EntityType.AREA_EFFECT_CLOUD)
+            val meta = entity.entityMeta as AreaEffectCloudMeta
+
+            val playerName = player.displayName ?: Component.text(player.username)
+
+            entity.updateViewableRule { recipients.contains(it) }
+            meta.radius = 0f
+            meta.isHasNoGravity = true
+            meta.customName = playerName.append(Component.text(": ")).append(Component.text(if (message.length > 20) message.take(17) + "..." else message))
+            meta.isCustomNameVisible = true
+
+            player.addPassenger(entity)
+
+            val task = Manager.scheduler.buildTask {
+                entity.remove()
+                chatHologramMap.remove(player)
+            }.delay(Duration.ofSeconds(3)).schedule()
+            chatHologramMap[player] = Pair(entity, task)
+
+            recipients.forEach {
+                it.playSound(Sound.sound(SoundEvent.ENTITY_ITEM_PICKUP, Sound.Source.MASTER, 1f, 2f), Sound.Emitter.self())
             }
         }
 
@@ -126,19 +183,23 @@ class AcquaintanceExtension : Extension() {
             // TODO: Leave parties after a while
         }
 
-        ChannelCommand.register()
-        FriendCommand.register()
-        PartyCommand.register()
+        if (databaseConfig.enabled) {
+            ChannelCommand.register()
+            FriendCommand.register()
+            PartyCommand.register()
+        }
 
         logger.info("[Acquaintance] Initialized!")
     }
 
     override fun terminate() {
-        ChannelCommand.unregister()
-        FriendCommand.unregister()
-        PartyCommand.unregister()
+        if (databaseConfig.enabled) {
+            ChannelCommand.unregister()
+            FriendCommand.unregister()
+            PartyCommand.unregister()
 
-        storage.connection.close()
+            storage?.connection?.close()
+        }
 
         logger.info("[Acquaintance] Terminated!")
     }

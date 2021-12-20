@@ -50,7 +50,7 @@ class Party(var leader: Player) : PacketGroupingAudience {
     }
 
     fun destroy() {
-        sendMessage(Component.text("The party was destroyed", NamedTextColor.RED).armify())
+        sendMessage(Component.text("The party was destroyed", NamedTextColor.RED))
         players.forEach {
             RelationshipManager.partyMap.remove(it)
         }
