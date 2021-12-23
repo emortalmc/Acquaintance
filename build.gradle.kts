@@ -45,7 +45,7 @@ dependencies {
     implementation("mysql:mysql-connector-java:8.0.27")
 
     // import kotlinx serialization
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 }
 
 // Take gradle.properties and apply it to resources.
