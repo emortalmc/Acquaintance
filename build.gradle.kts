@@ -38,7 +38,7 @@ dependencies {
     compileOnly(kotlin("reflect"))
 
     // Compile Minestom into project
-    compileOnly("com.github.emortaldev:Minestom:d25ea275e4")
+    compileOnly("com.github.Minestom:Minestom:517d6a3b7c")
     compileOnly("com.github.EmortalMC:Immortal:37d9d50ec8")
 
     //implementation("redis.clients:jedis:3.7.0")

@@ -23,6 +23,7 @@ object RelationshipManager {
         .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
 
     internal val errorColor = NamedTextColor.RED
+    internal val successColor = NamedTextColor.GREEN
 
 
     val friendCache = ConcurrentHashMap<UUID, MutableList<UUID>>()
@@ -104,11 +105,20 @@ object RelationshipManager {
     // FRIENDS -----
 
     fun Player.requestFriend(player: Player) {
+        if (this.friends.size > 200) {
+            this.sendMessage(Component.text("You already have enough friends", errorColor))
+            return
+        }
+
         if (friendRequestMap[player]?.contains(this) == true) {
             this.sendMessage(Component.text("You have already sent a request to that player", errorColor))
             return
         }
 
+        if (friendRequestMap[this]?.contains(player) == true) {
+            player.acceptFriendRequest(this)
+            return
+        }
         friendRequestMap[player]!!.add(this)
 
         player.sendMessage(
@@ -163,12 +173,12 @@ object RelationshipManager {
         this.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text("You are now friends with '${player.username}'!", NamedTextColor.GREEN))
+                .append(Component.text("You are now friends with '${player.username}'!", successColor))
         )
         player.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text("You are now friends with '${this.username}'!", NamedTextColor.GREEN))
+                .append(Component.text("You are now friends with '${this.username}'!", successColor))
         )
 
         return true

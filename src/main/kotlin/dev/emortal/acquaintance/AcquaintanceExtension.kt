@@ -9,7 +9,7 @@ import dev.emortal.acquaintance.commands.ChannelCommand
 import dev.emortal.acquaintance.commands.FriendCommand
 import dev.emortal.acquaintance.commands.PartyCommand
 import dev.emortal.acquaintance.config.DatabaseConfig
-import dev.emortal.acquaintance.db.MariaStorage
+import dev.emortal.acquaintance.db.MySQLStorage
 import dev.emortal.acquaintance.db.Storage
 import dev.emortal.immortal.config.ConfigHelper
 import dev.emortal.immortal.config.ConfigHelper.noPrettyPrintFormat
@@ -58,7 +58,7 @@ class AcquaintanceExtension : Extension() {
         databaseConfig = ConfigHelper.initConfigFile(databaseConfigPath, databaseConfig)
 
         if (databaseConfig.enabled) {
-            storage = MariaStorage()
+            storage = MySQLStorage()
         }
 
         eventNode.listenOnly<PlayerLoginEvent> {
@@ -94,6 +94,21 @@ class AcquaintanceExtension : Extension() {
                             .append(Component.text(" left the server", NamedTextColor.GRAY))
                     )
             }
+
+            RelationshipManager.partyInviteMap.remove(player)
+
+            if (player.party != null) leavingTasks[player] =
+                Manager.scheduler.buildTask {
+                    player.party?.sendMessage(
+                        Component.text(
+                            "${player.username} was kicked from the party because they were offline",
+                            NamedTextColor.GOLD
+                        )
+                    )
+                    player.party?.remove(player, false)
+                }.delay(Duration.ofMinutes(5)).schedule()
+
+            // TODO: Leave parties after a while
         }
 
         eventNode.listenOnly<PlayerSpawnEvent> {
@@ -104,6 +119,7 @@ class AcquaintanceExtension : Extension() {
         }
 
         eventNode.listenOnly<PlayerChatEvent> {
+
             setChatFormat {
                 Component.text()
                     .append(player.displayName!!)
@@ -150,37 +166,23 @@ class AcquaintanceExtension : Extension() {
             entity.updateViewableRule { recipients.contains(it) }
             meta.radius = 0f
             meta.isHasNoGravity = true
-            meta.customName = playerName.append(Component.text(": ")).append(Component.text(if (message.length > 20) message.take(17) + "..." else message))
+            meta.customName = playerName.append(Component.text(": ")).append(Component.text(if (message.length > 20) message.take(20) + "..." else message))
             meta.isCustomNameVisible = true
 
-            player.addPassenger(entity)
+            entity.setInstance(player.instance!!, player.position)
+                .thenRun {
+                    player.addPassenger(entity)
 
-            val task = Manager.scheduler.buildTask {
-                entity.remove()
-                chatHologramMap.remove(player)
-            }.delay(Duration.ofSeconds(3)).schedule()
-            chatHologramMap[player] = Pair(entity, task)
+                    val task = Manager.scheduler.buildTask {
+                        entity.remove()
+                        chatHologramMap.remove(player)
+                    }.delay(Duration.ofSeconds(3)).schedule()
+                    chatHologramMap[player] = Pair(entity, task)
+                }
 
             recipients.forEach {
                 it.playSound(Sound.sound(SoundEvent.ENTITY_ITEM_PICKUP, Sound.Source.MASTER, 1f, 2f), Sound.Emitter.self())
             }
-        }
-
-        eventNode.listenOnly<PlayerDisconnectEvent> {
-            RelationshipManager.partyInviteMap.remove(player)
-
-            if (player.party != null) leavingTasks[player] =
-                Manager.scheduler.buildTask {
-                    player.party?.sendMessage(
-                        Component.text(
-                            "${player.username} was kicked from the party because they were offline",
-                            NamedTextColor.GOLD
-                        )
-                    )
-                    player.party?.remove(player, false)
-                }.delay(Duration.ofMinutes(5)).schedule()
-
-            // TODO: Leave parties after a while
         }
 
         if (databaseConfig.enabled) {

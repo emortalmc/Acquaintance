@@ -4,11 +4,12 @@ import dev.emortal.acquaintance.AcquaintanceExtension
 import dev.emortal.acquaintance.RelationshipManager
 import dev.emortal.acquaintance.RelationshipManager.acceptFriendRequest
 import dev.emortal.acquaintance.RelationshipManager.denyFriendRequest
-import dev.emortal.acquaintance.RelationshipManager.errorColor
 import dev.emortal.acquaintance.RelationshipManager.friendPrefix
 import dev.emortal.acquaintance.RelationshipManager.friends
 import dev.emortal.acquaintance.RelationshipManager.removeFriend
 import dev.emortal.acquaintance.RelationshipManager.requestFriend
+import dev.emortal.acquaintance.RelationshipManager.successColor
+import dev.emortal.acquaintance.RelationshipManager.errorColor
 import dev.emortal.acquaintance.util.armify
 import dev.emortal.immortal.game.GameManager.game
 import net.kyori.adventure.text.Component
@@ -68,7 +69,7 @@ object FriendCommand : Kommand({
         player.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text("Denied friend request from '${user.username}'!", NamedTextColor.GREEN))
+                .append(Component.text("Denied friend request from '${user.username}'!", successColor))
         )
     }
 
@@ -148,9 +149,14 @@ object FriendCommand : Kommand({
             )
         }
 
+        val specialMessage = when (onlineFriends.size) {
+            69 -> "nice"
+            else -> ""
+        }
+
         val message = Component.text()
             .append(Component.text("Your friends: ", NamedTextColor.GOLD, TextDecoration.BOLD))
-            .append(Component.text("●${onlineFriends.size}", NamedTextColor.GREEN))
+            .append(Component.text("●${onlineFriends.size} ($specialMessage)", NamedTextColor.GREEN))
             .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
             .append(Component.text("●${friends.size - onlineFriends.size}\n", NamedTextColor.GRAY))
             .append(listComponent)

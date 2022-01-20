@@ -14,7 +14,7 @@ import java.sql.DriverManager
 import java.util.*
 
 
-class MariaStorage : Storage() {
+class MySQLStorage : Storage() {
 
     init {
         val statement =
