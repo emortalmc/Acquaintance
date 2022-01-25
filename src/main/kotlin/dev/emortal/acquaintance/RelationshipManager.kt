@@ -1,6 +1,9 @@
 package dev.emortal.acquaintance
 
+import dev.emortal.acquaintance.RelationshipManager.getFriendsAsync
 import dev.emortal.acquaintance.channel.ChatChannel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
@@ -23,8 +26,10 @@ object RelationshipManager {
         .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
 
     internal val errorColor = NamedTextColor.RED
-    internal val successColor = NamedTextColor.GREEN
+    internal val errorDark = TextColor.color(200, 0, 0)
 
+    internal val successColor = NamedTextColor.GREEN
+    internal val successDark = TextColor.color(0, 200, 0)
 
     val friendCache = ConcurrentHashMap<UUID, MutableList<UUID>>()
 
@@ -36,22 +41,23 @@ object RelationshipManager {
         }
         set(value) = setTag(chatChannelTag, value.ordinal)
 
-    val partyInviteMap = ConcurrentHashMap<Player, MutableList<Player>>()
-    val friendRequestMap = ConcurrentHashMap<Player, MutableList<Player>>()
-    val partyMap = ConcurrentHashMap<Player, Party>()
+    val partyInviteMap = ConcurrentHashMap<UUID, MutableList<UUID>>()
+    val friendRequestMap = ConcurrentHashMap<UUID, MutableList<UUID>>()
+    val partyMap = ConcurrentHashMap<UUID, Party>()
 
     val Player.party
-        get() = partyMap[this]
-    val Player.friends
-        get() = friendCache[uuid] ?: AcquaintanceExtension.storage!!.getFriends(uuid)
+        get() = partyMap[this.uuid]
+
+    suspend fun Player.getFriendsAsync() =
+        friendCache[uuid] ?: AcquaintanceExtension.storage!!.getFriendsAsync(uuid)
 
     fun Player.inviteToParty(player: Player) {
-        if (partyInviteMap[player]?.contains(this) == true) {
+        if (partyInviteMap[player.uuid]?.contains(this.uuid) == true) {
             this.sendMessage(Component.text("You have already sent an invite to that player", errorColor))
             return
         }
 
-        partyInviteMap[player]!!.add(this)
+        partyInviteMap[player.uuid]!!.add(this.uuid)
 
         if (!partyMap.contains(this)) Party(this)
 
@@ -83,9 +89,9 @@ object RelationshipManager {
     }
 
     fun Player.acceptInvite(player: Player): Boolean {
-        if (!partyInviteMap[this]!!.contains(player)) return false
+        if (!partyInviteMap[this.uuid]!!.contains(player.uuid)) return false
 
-        partyInviteMap[this]!!.remove(player)
+        partyInviteMap[this.uuid]!!.remove(player.uuid)
 
         if (player.party == null) return false
         player.party!!.add(this)
@@ -94,9 +100,9 @@ object RelationshipManager {
     }
 
     fun Player.denyInvite(player: Player): Boolean {
-        if (!partyInviteMap[this]!!.contains(player)) return false
+        if (!partyInviteMap[this.uuid]!!.contains(player.uuid)) return false
 
-        partyInviteMap[this]!!.remove(player)
+        partyInviteMap[this.uuid]!!.remove(player.uuid)
 
         return true
     }
@@ -104,32 +110,32 @@ object RelationshipManager {
 
     // FRIENDS -----
 
-    fun Player.requestFriend(player: Player) {
-        if (this.friends.size > 200) {
-            this.sendMessage(Component.text("You already have enough friends", errorColor))
-            return
+    fun Player.requestFriend(player: Player) = runBlocking {
+        if (this@requestFriend.getFriendsAsync().size > 200) {
+            this@requestFriend.sendMessage(Component.text("You already have enough friends", errorColor))
+            return@runBlocking
         }
 
-        if (friendRequestMap[player]?.contains(this) == true) {
-            this.sendMessage(Component.text("You have already sent a request to that player", errorColor))
-            return
+        if (friendRequestMap[player.uuid]?.contains(this@requestFriend.uuid) == true) {
+            this@requestFriend.sendMessage(Component.text("You have already sent a request to that player", errorColor))
+            return@runBlocking
         }
 
-        if (friendRequestMap[this]?.contains(player) == true) {
-            player.acceptFriendRequest(this)
-            return
+        if (friendRequestMap[this@requestFriend.uuid]?.contains(player.uuid) == true) {
+            player.acceptFriendRequest(this@requestFriend)
+            return@runBlocking
         }
-        friendRequestMap[player]!!.add(this)
+        friendRequestMap[player.uuid]!!.add(this@requestFriend.uuid)
 
         player.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text(this.username, TextColor.color(255, 220, 0)))
+                .append(Component.text(this@requestFriend.username, TextColor.color(255, 220, 0), TextDecoration.BOLD))
                 .append(
                     Component.text(" wants to be friends! ", TextColor.color(255, 150, 0))
                         .append(
                             Component.text("[✔]", NamedTextColor.GREEN, TextDecoration.BOLD)
-                                .clickEvent(ClickEvent.runCommand("/friend accept ${this.username}"))
+                                .clickEvent(ClickEvent.runCommand("/friend accept ${this@requestFriend.username}"))
                                 .hoverEvent(
                                     HoverEvent.showText(
                                         Component.text(
@@ -142,7 +148,7 @@ object RelationshipManager {
                         .append(Component.space())
                         .append(
                             Component.text("[❌]", NamedTextColor.RED, TextDecoration.BOLD)
-                                .clickEvent(ClickEvent.runCommand("/friend deny ${this.username}"))
+                                .clickEvent(ClickEvent.runCommand("/friend deny ${this@requestFriend.username}"))
                                 .hoverEvent(
                                     HoverEvent.showText(
                                         Component.text(
@@ -155,30 +161,37 @@ object RelationshipManager {
                 )
         )
 
-        this.sendMessage(
+        this@requestFriend.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text("Sent a friend request to '${player.username}'!", NamedTextColor.GREEN))
+                .append(Component.text("Sent a friend request to ", successDark))
+                .append(Component.text(player.username, successColor, TextDecoration.BOLD))
+                .append(Component.text("!", successDark))
         )
     }
 
     fun Player.acceptFriendRequest(player: Player): Boolean {
-        if (!friendRequestMap[this]!!.contains(player)) return false
+        if (!friendRequestMap[this.uuid]!!.contains(player.uuid)) return false
 
-        friendRequestMap[this]!!.remove(player)
+        friendRequestMap[this.uuid]!!.remove(player.uuid)
 
         AcquaintanceExtension.storage!!.addFriend(this.uuid, player.uuid)
-        friendCache[this.uuid]!!.add(player.uuid)
+        friendCache[this.uuid]?.add(player.uuid)
+        friendCache[player.uuid]?.add(this.uuid)
 
         this.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text("You are now friends with '${player.username}'!", successColor))
+                .append(Component.text("You are now friends with ", successDark))
+                .append(Component.text(player.username, successColor, TextDecoration.BOLD))
+                .append(Component.text("!", successDark))
         )
         player.sendMessage(
             Component.text()
                 .append(friendPrefix)
-                .append(Component.text("You are now friends with '${this.username}'!", successColor))
+                .append(Component.text("You are now friends with ", successDark))
+                .append(Component.text(this.username, successColor, TextDecoration.BOLD))
+                .append(Component.text("!", successDark))
         )
 
         return true
@@ -186,18 +199,16 @@ object RelationshipManager {
 
     fun UUID.removeFriend(uuid: UUID) {
         AcquaintanceExtension.storage!!.removeFriend(this, uuid)
-        friendCache[this]!!.remove(uuid)
+        friendCache[this]?.remove(uuid)
+        friendCache[uuid]?.remove(this)
     }
 
-    fun Player.removeFriend(player: Player) {
-        AcquaintanceExtension.storage!!.removeFriend(this.uuid, player.uuid)
-        friendCache[this.uuid]!!.remove(player.uuid)
-    }
+    fun Player.removeFriend(player: Player) = uuid.removeFriend(player.uuid)
 
     fun Player.denyFriendRequest(player: Player): Boolean {
-        if (!friendRequestMap[this]!!.contains(player)) return false
+        if (!friendRequestMap[this.uuid]!!.contains(player.uuid)) return false
 
-        friendRequestMap[this]!!.remove(player)
+        friendRequestMap[this.uuid]!!.remove(player.uuid)
 
         return true
     }

@@ -24,7 +24,7 @@ class Party(var leader: Player) : PacketGroupingAudience {
 
     fun add(player: Player, sendMessage: Boolean = true) {
         players.add(player)
-        RelationshipManager.partyMap[player] = this
+        RelationshipManager.partyMap[player.uuid] = this
         if (player != leader && sendMessage) sendMessage(
             Component.text()
                 .append(Component.text("JOIN PARTY", NamedTextColor.GREEN, TextDecoration.BOLD))
@@ -46,13 +46,13 @@ class Party(var leader: Player) : PacketGroupingAudience {
         players.remove(player)
         if (players.size == 1) leader = players.first()
 
-        RelationshipManager.partyMap.remove(player)
+        RelationshipManager.partyMap.remove(player.uuid)
     }
 
     fun destroy() {
         sendMessage(Component.text("The party was destroyed", NamedTextColor.RED))
         players.forEach {
-            RelationshipManager.partyMap.remove(it)
+            RelationshipManager.partyMap.remove(it.uuid)
         }
         players.clear()
     }

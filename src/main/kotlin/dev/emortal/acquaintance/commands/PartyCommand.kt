@@ -4,8 +4,11 @@ import dev.emortal.acquaintance.RelationshipManager
 import dev.emortal.acquaintance.RelationshipManager.acceptInvite
 import dev.emortal.acquaintance.RelationshipManager.denyInvite
 import dev.emortal.acquaintance.RelationshipManager.errorColor
+import dev.emortal.acquaintance.RelationshipManager.errorDark
 import dev.emortal.acquaintance.RelationshipManager.inviteToParty
 import dev.emortal.acquaintance.RelationshipManager.party
+import dev.emortal.acquaintance.RelationshipManager.successColor
+import dev.emortal.acquaintance.RelationshipManager.successDark
 import dev.emortal.acquaintance.util.armify
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -91,7 +94,11 @@ object PartyCommand : Kommand({
 
         val successful = player.acceptInvite(user)
         if (!successful) {
-            player.sendMessage(Component.text("You have no invite from '${user.username}'", errorColor))
+            player.sendMessage(
+                Component.text()
+                    .append(Component.text("You have no invite from ", errorDark))
+                    .append(Component.text(user.username, errorColor, TextDecoration.BOLD))
+            )
             return@syntax
         }
     }
@@ -106,11 +113,21 @@ object PartyCommand : Kommand({
 
         val successful = player.denyInvite(user)
         if (!successful) {
-            player.sendMessage(Component.text("You have no invite from '${user.username}'", errorColor))
+            player.sendMessage(
+                Component.text()
+                    .append(Component.text("You have no invite from ", errorDark))
+                    .append(Component.text(user.username, errorColor, TextDecoration.BOLD))
+            )
             return@syntax
         }
 
-        player.sendMessage(Component.text("Denied invite from ${user.username}!", NamedTextColor.GREEN))
+        player.sendMessage(
+            Component.text()
+                .append(Component.text("Denied invite from ", successDark))
+                .append(Component.text(user.username, successColor, TextDecoration.BOLD))
+                .append(Component.text("!", successDark))
+
+        )
     }
 
     syntax(kick, user) {
@@ -126,12 +143,23 @@ object PartyCommand : Kommand({
         }
 
         if (playerToKick == null) {
-            player.sendMessage(Component.text("Couldn't find '${!user}' in your party", errorColor))
+            player.sendMessage(
+                Component.text()
+                    .append(Component.text("Couldn't find ", errorDark))
+                    .append(Component.text(!user, errorColor, TextDecoration.BOLD))
+                    .append(Component.text(" in your party", errorDark))
+            )
             return@syntax
         }
 
-        playerToKick.sendMessage(Component.text("You were kicked from ", errorColor))
-        player.party?.remove(playerToKick)
+        playerToKick.sendMessage(
+            Component.text()
+                .append(Component.text("You were kicked from ", errorDark))
+                .append(Component.text(player.party!!.leader.username, errorColor, TextDecoration.BOLD))
+                .append(Component.text("'s party", errorDark))
+
+        )
+        player.party!!.remove(playerToKick)
     }
 
     syntax(user) {
@@ -147,7 +175,7 @@ object PartyCommand : Kommand({
             return@syntax
         }
 
-        val amountOfInvites = RelationshipManager.partyInviteMap[player]?.size ?: 0
+        val amountOfInvites = RelationshipManager.partyInviteMap[player.uuid]?.size ?: 0
 
         if (amountOfInvites > 4) {
             player.sendMessage(Component.text("You are sending too many invites", errorColor))

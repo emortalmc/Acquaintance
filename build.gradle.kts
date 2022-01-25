@@ -43,6 +43,8 @@ dependencies {
 
     //implementation("redis.clients:jedis:3.7.0")
     implementation("mysql:mysql-connector-java:8.0.28")
+    implementation("com.zaxxer:HikariCP:5.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
 
     // import kotlinx serialization
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
