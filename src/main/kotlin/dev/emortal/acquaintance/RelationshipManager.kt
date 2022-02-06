@@ -17,13 +17,15 @@ import java.util.concurrent.ConcurrentHashMap
 
 object RelationshipManager {
 
+    internal var separator = Component.text(" | ", NamedTextColor.DARK_GRAY)
+
     internal val partyPrefix = Component.text()
         .append(Component.text("PARTY", TextColor.color(255, 100, 255), TextDecoration.BOLD))
-        .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
+        .append(separator)
 
     internal val friendPrefix = Component.text()
         .append(Component.text("FRIEND", NamedTextColor.GOLD, TextDecoration.BOLD))
-        .append(Component.text(" | ", NamedTextColor.DARK_GRAY))
+        .append(separator)
 
     internal val errorColor = NamedTextColor.RED
     internal val errorDark = TextColor.color(200, 0, 0)

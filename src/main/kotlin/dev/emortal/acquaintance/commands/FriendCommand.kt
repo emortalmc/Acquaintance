@@ -36,7 +36,7 @@ object FriendCommand : Kommand({
     val list by literal
 
     syntax(accept, user) {
-        val user = Manager.connection.getPlayer((!user))
+        val user = Manager.connection.getPlayer(!user)
 
         if (user == null) {
             player.sendMessage(Component.text("That player is not online", errorColor))
@@ -45,7 +45,12 @@ object FriendCommand : Kommand({
 
         val successful = player.acceptFriendRequest(user)
         if (!successful) {
-            player.sendMessage(Component.text("You have no request from '${user.username}'", errorColor))
+            player.sendMessage(
+                Component.text()
+                    .append(Component.text("You have no request from ", errorDark))
+                    .append(Component.text(user.username, errorColor, TextDecoration.BOLD))
+
+            )
             return@syntax
         }
 
