@@ -2,7 +2,6 @@ package dev.emortal.acquaintance
 
 import dev.emortal.acquaintance.RelationshipManager.channel
 import dev.emortal.acquaintance.RelationshipManager.friendPrefix
-import dev.emortal.acquaintance.RelationshipManager.getFriendsAsync
 import dev.emortal.acquaintance.RelationshipManager.party
 import dev.emortal.acquaintance.RelationshipManager.partyPrefix
 import dev.emortal.acquaintance.channel.ChatChannel
@@ -12,28 +11,18 @@ import dev.emortal.acquaintance.db.MySQLStorage
 import dev.emortal.acquaintance.db.Storage
 import dev.emortal.immortal.config.ConfigHelper
 import dev.emortal.immortal.config.ConfigHelper.noPrettyPrintFormat
-import dev.emortal.immortal.game.GameManager
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.audience.Audience
-import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import net.minestom.server.entity.Entity
-import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.Player
-import net.minestom.server.entity.metadata.other.AreaEffectCloudMeta
-import net.minestom.server.event.player.PlayerChatEvent
-import net.minestom.server.event.player.PlayerDisconnectEvent
-import net.minestom.server.event.player.PlayerLoginEvent
-import net.minestom.server.event.player.PlayerSpawnEvent
+import net.minestom.server.event.player.*
 import net.minestom.server.extensions.Extension
-import net.minestom.server.network.packet.server.play.TeamsPacket
-import net.minestom.server.sound.SoundEvent
 import net.minestom.server.timer.Task
 import org.slf4j.LoggerFactory
 import world.cepi.kstom.Manager
+import world.cepi.kstom.adventure.plainText
 import world.cepi.kstom.event.listenOnly
 import java.nio.file.Path
 import java.time.Duration
@@ -120,11 +109,16 @@ class AcquaintanceExtension : Extension() {
             }
         }
 
+        val chatLogger = LoggerFactory.getLogger("Chat")
+        val commandLogger = LoggerFactory.getLogger("Command")
+
+        eventNode.listenOnly<PlayerCommandEvent> {
+            commandLogger.info("${player.displayName!!.plainText()} ran command: $command")
+        }
+
         eventNode.listenOnly<PlayerChatEvent> {
 
             message = message
-                .replace("laggy", "high performance")
-                .replace("lagging", "highly performing")
                 .replace("lag", "high performance")
 
             setChatFormat {
@@ -161,6 +155,8 @@ class AcquaintanceExtension : Extension() {
                         .build()
                 }
             }
+
+            chatLogger.info("${player.displayName!!.plainText()}: $message")
         }
 
         if (databaseConfig.enabled) {
@@ -169,6 +165,7 @@ class AcquaintanceExtension : Extension() {
             MessageCommand.register()
             PartyCommand.register()
             ShrugCommand.register()
+            ReplyCommand.register()
         }
 
         logger.info("[Acquaintance] Initialized!")
@@ -180,6 +177,7 @@ class AcquaintanceExtension : Extension() {
         MessageCommand.unregister()
         PartyCommand.unregister()
         ShrugCommand.unregister()
+        ReplyCommand.unregister()
 
         logger.info("[Acquaintance] Terminated!")
     }

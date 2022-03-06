@@ -39,7 +39,9 @@ dependencies {
 
     // Compile Minestom into project
     compileOnly("com.github.Minestom:Minestom:517d6a3b7c")
-    compileOnly("com.github.EmortalMC:Immortal:e77d8d5cb7")
+    compileOnly("com.github.EmortalMC:Immortal:d81a0f65a4")
+    //compileOnly("com.github.emortaldev:Kstom:def1719826")
+    //compileOnly("net.luckperms:api:5.3")
 
     //implementation("redis.clients:jedis:3.7.0")
     compileOnly("mysql:mysql-connector-java:8.0.28")

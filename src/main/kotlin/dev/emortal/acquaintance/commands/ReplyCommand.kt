@@ -14,27 +14,27 @@ import net.minestom.server.sound.SoundEvent
 import world.cepi.kstom.Manager
 import world.cepi.kstom.command.kommand.Kommand
 
-object MessageCommand : Kommand({
+object ReplyCommand : Kommand({
 
     onlyPlayers
 
-    val user = ArgumentWord("user")
     val message = ArgumentStringArray("message")
 
-    syntaxSuspending(Dispatchers.IO, user, message) {
-        val playerToMessage = Manager.connection.getPlayer(!user)
+    syntaxSuspending(Dispatchers.IO, message) {
+        val replyingPlayer = RelationshipManager.lastMessageMap[this.player.uuid]?.let { Manager.connection.getPlayer(it) }
+
         val message = !message
 
-        if (playerToMessage == null) {
+        if (replyingPlayer == null) {
             player.sendMessage(Component.text("That player is not online", RelationshipManager.errorDark))
             return@syntaxSuspending
         }
 
-        if (!player.getFriendsAsync().contains(playerToMessage.uuid)) {
+        if (!player.getFriendsAsync().contains(replyingPlayer.uuid)) {
             player.sendMessage(
                 Component.text()
                     .append(Component.text("You are not friends with ", RelationshipManager.errorDark))
-                    .append(Component.text(playerToMessage.username, RelationshipManager.errorColor, TextDecoration.BOLD))
+                    .append(Component.text(replyingPlayer.username, RelationshipManager.errorColor, TextDecoration.BOLD))
 
             )
             return@syntaxSuspending
@@ -44,7 +44,7 @@ object MessageCommand : Kommand({
         val arrowComponent = Component.text(" → ", NamedTextColor.GRAY)
         val messageComponent = Component.text(message.joinToString(separator = " "))
 
-        playerToMessage.sendMessage(
+        replyingPlayer.sendMessage(
             Component.text()
                 .append(Component.text("[", NamedTextColor.DARK_AQUA))
                 .append(player.displayName!!)
@@ -58,15 +58,12 @@ object MessageCommand : Kommand({
                 .append(Component.text("[", NamedTextColor.DARK_AQUA))
                 .append(meComponent)
                 .append(arrowComponent)
-                .append(playerToMessage.displayName!!)
+                .append(replyingPlayer.displayName!!)
                 .append(Component.text("] ", NamedTextColor.DARK_AQUA))
                 .append(messageComponent)
         )
 
-        RelationshipManager.lastMessageMap[playerToMessage.uuid] = player.uuid
-        RelationshipManager.lastMessageMap[player.uuid] = playerToMessage.uuid
-
-        playerToMessage.playSound(Sound.sound(SoundEvent.ENTITY_ITEM_PICKUP, Sound.Source.MASTER, 1f, 1f))
+        replyingPlayer.playSound(Sound.sound(SoundEvent.ENTITY_ITEM_PICKUP, Sound.Source.MASTER, 1f, 1f))
     }
 
-}, "message", "msg")
+}, "reply", "r")

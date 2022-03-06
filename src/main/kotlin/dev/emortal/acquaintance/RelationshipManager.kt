@@ -35,6 +35,8 @@ object RelationshipManager {
 
     val friendCache = ConcurrentHashMap<UUID, MutableList<UUID>>()
 
+    internal val lastMessageMap = ConcurrentHashMap<UUID, UUID>()
+
     val chatChannelTag = Tag.Integer("chatChannel")
 
     var Player.channel: ChatChannel

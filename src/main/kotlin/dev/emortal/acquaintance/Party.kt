@@ -1,11 +1,16 @@
 package dev.emortal.acquaintance
 
 import dev.emortal.acquaintance.util.armify
+import dev.emortal.immortal.event.PlayerJoinGameEvent
+import dev.emortal.immortal.game.GameManager
+import dev.emortal.immortal.game.GameManager.joinGame
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
 import net.minestom.server.adventure.audience.PacketGroupingAudience
 import net.minestom.server.entity.Player
+import world.cepi.kstom.Manager
+import world.cepi.kstom.event.listenOnly
 import java.util.concurrent.ConcurrentHashMap
 
 class Party(var leader: Player) : PacketGroupingAudience {
@@ -20,6 +25,13 @@ class Party(var leader: Player) : PacketGroupingAudience {
                 .append(Component.text(leader.username, NamedTextColor.GREEN, TextDecoration.BOLD))
                 .armify()
         )
+
+        /*Manager.globalEvent.listenOnly<PlayerJoinGameEvent> {
+            val game = getGame()
+            players.forEach {
+                it.joinGame(game)
+            }
+        }*/
     }
 
     fun add(player: Player, sendMessage: Boolean = true) {
