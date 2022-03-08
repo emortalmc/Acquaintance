@@ -1,6 +1,5 @@
 package dev.emortal.acquaintance.db
 
-import com.google.common.io.ByteStreams
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.emortal.acquaintance.AcquaintanceExtension
@@ -144,7 +143,7 @@ class MySQLStorage : Storage() {
     fun InputStream.toUUID(): UUID? {
         val buffer = ByteBuffer.allocate(16)
         try {
-            buffer.put(ByteStreams.toByteArray(this))
+            buffer.put(this.readAllBytes())
             buffer.flip()
             return UUID(buffer.long, buffer.long)
         } catch (e: IOException) {
