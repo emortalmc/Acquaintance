@@ -2,44 +2,26 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    // Apply the Kotlin JVM plugin to add support for Kotlin.
     id("org.jetbrains.kotlin.jvm") version "1.6.10"
-    // Kotlinx serialization for any data format
     kotlin("plugin.serialization") version "1.6.10"
-    // Shade the plugin
     id("com.github.johnrengelman.shadow") version "7.1.0"
-    // Allow publishing
     `maven-publish`
 
-    // Apply the application plugin to add support for building a jar
     java
-    // Dokka documentation w/ kotlin
-    id("org.jetbrains.dokka") version "1.6.10"
 }
 
 repositories {
-    // Use mavenCentral
     mavenCentral()
 
     maven(url = "https://jitpack.io")
     maven(url = "https://repo.spongepowered.org/maven")
-    maven(url = "https://repo.minestom.com/repository/maven-public/")
-    maven(url = "https://repo.velocitypowered.com/snapshots/")
 }
 
 dependencies {
-    // Align versions of all Kotlin components
-    compileOnly(platform("org.jetbrains.kotlin:kotlin-bom"))
+    //compileOnly(kotlin("stdlib"))
 
-    // Use the Kotlin JDK 8 standard library.
-    compileOnly(kotlin("stdlib"))
-
-    // Use the Kotlin reflect library.
-    compileOnly(kotlin("reflect"))
-
-    // Compile Minestom into project
-    compileOnly("com.github.Minestom:Minestom:517d6a3b7c")
-    compileOnly("com.github.EmortalMC:Immortal:d81a0f65a4")
+    compileOnly("com.github.Minestom:Minestom:f36304f613")
+    compileOnly("com.github.EmortalMC:Immortal:f8665c96cc")
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
