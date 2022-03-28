@@ -9,13 +9,13 @@ import java.util.*
 
 object RelationshipManager {
 
-    suspend fun Player.getCachedUsername(): String? = withContext(Dispatchers.IO) {
+    suspend fun UUID.getCachedUsername(): String? = withContext(Dispatchers.IO) {
         val bucket = redisson.getBucket<String>("${this}username")
         if (bucket.isExists) {
             return@withContext bucket.get()
         }
 
-        AcquaintanceExtension.storage?.getCachedUsernameAsync(uuid)
+        AcquaintanceExtension.storage?.getCachedUsernameAsync(this@getCachedUsername)
     }
 
     suspend fun Player.getFriendsAsync(): List<UUID> = withContext(Dispatchers.IO) {
