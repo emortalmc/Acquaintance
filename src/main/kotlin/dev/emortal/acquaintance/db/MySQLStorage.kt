@@ -13,55 +13,31 @@ import java.nio.ByteBuffer
 import java.nio.charset.StandardCharsets
 import java.util.*
 
-
 class MySQLStorage : Storage() {
 
     private val logger = LoggerFactory.getLogger("MySQLStorage")
 
     init {
         logger.info("Init MySQLStorage")
-
-        val conn = getConnection()
-        conn.autoCommit = false
-
-        val statement =
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS friends (`playerA` BINARY(16), `playerB` BINARY(16))")
-        statement.executeUpdate()
-        statement.close()
-
-        val statement2 =
-            conn.prepareStatement("CREATE TABLE IF NOT EXISTS blocks (`playerA` BINARY(16), `playerB` BINARY(16))")
-        statement2.executeUpdate()
-        statement2.close()
-
-        conn.autoCommit = true
-        conn.close()
     }
 
-    override fun blockPlayer(player: UUID) {
-
-    }
-
-    override fun unblockPlayer(player: UUID) {
-
-    }
-
-    override fun addFriend(player: UUID, friend: UUID): Unit = runBlocking {
+    override fun setCachedUsername(player: UUID, username: String): Unit = runBlocking {
         launch {
             val conn = getConnection()
             conn.autoCommit = false
 
-            val statement = conn.prepareStatement("INSERT INTO friends VALUES(?, ?)")
+            val statement = conn.prepareStatement("DELETE FROM namecache WHERE player=?")
             statement.setBinaryStream(1, player.toInputStream())
-            statement.setBinaryStream(2, friend.toInputStream())
-            statement.addBatch()
 
-            statement.setBinaryStream(1, friend.toInputStream())
-            statement.setBinaryStream(2, player.toInputStream())
-            statement.addBatch()
-
-            statement.executeBatch()
+            statement.executeUpdate()
             statement.close()
+
+            val statement2 = conn.prepareStatement("INSERT INTO namecache VALUES(?, ?)")
+            statement2.setBinaryStream(1, player.toInputStream())
+            statement2.setString(2, username)
+
+            statement2.executeBatch()
+            statement2.close()
 
             conn.autoCommit = true
 
@@ -70,48 +46,22 @@ class MySQLStorage : Storage() {
         }
     }
 
-    override fun removeFriend(player: UUID, friend: UUID): Unit = runBlocking {
-        launch {
-            val conn = getConnection()
-
-            conn.autoCommit = false
-
-            val statement = conn.prepareStatement("DELETE FROM friends WHERE playerA=? AND playerB=?")
-            statement.setBinaryStream(1, player.toInputStream())
-            statement.setBinaryStream(2, friend.toInputStream())
-            statement.addBatch()
-
-            statement.setBinaryStream(1, friend.toInputStream())
-            statement.setBinaryStream(2, player.toInputStream())
-            statement.addBatch()
-
-            statement.executeBatch()
-            statement.close()
-
-            conn.autoCommit = true
-
-            statement.close()
-            conn.close()
-        }
-    }
-
-    override suspend fun getFriendsAsync(player: UUID): MutableList<UUID> = coroutineScope {
+    override suspend fun getCachedUsernameAsync(player: UUID): String? = coroutineScope {
         return@coroutineScope async {
             val conn = getConnection()
-            val statement = conn.prepareStatement("SELECT playerB FROM friends WHERE playerA=?")
+            val statement = conn.prepareStatement("SELECT username FROM namecache WHERE player=?")
 
             statement.setBinaryStream(1, player.toInputStream())
 
             val results = statement.executeQuery()
 
-            val uuidList = mutableListOf<UUID>()
-            while (results.next()) {
-                results.getBinaryStream(1).toUUID()?.let { uuidList.add(it) }
-            }
+            var name: String? = null
+            if (results.first()) name = results.getString(1)
+
             statement.close()
             conn.close()
 
-            return@async uuidList
+            return@async name
         }.await()
     }
 
@@ -122,7 +72,7 @@ class MySQLStorage : Storage() {
         val dbUsername = URLEncoder.encode(dbConfig.username, StandardCharsets.UTF_8.toString())
         val dbPassword = URLEncoder.encode(dbConfig.password, StandardCharsets.UTF_8.toString())
 
-        //172.17.0.1
+        // docker 172.17.0.1
 
         val hikariConfig = HikariConfig()
         hikariConfig.jdbcUrl = "jdbc:mysql://${dbConfig.address}:${dbConfig.port}/${dbName}?user=${dbUsername}&password=${dbPassword}"

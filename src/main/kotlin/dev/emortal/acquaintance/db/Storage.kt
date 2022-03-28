@@ -6,13 +6,10 @@ import java.util.*
 
 abstract class Storage {
 
-    abstract fun blockPlayer(player: UUID)
-    abstract fun unblockPlayer(player: UUID)
+    //abstract suspend fun getFriendsAsync(player: UUID): MutableList<UUID>
 
-    abstract fun addFriend(player: UUID, friend: UUID)
-    abstract fun removeFriend(player: UUID, friend: UUID)
-
-    abstract suspend fun getFriendsAsync(player: UUID): MutableList<UUID>
+    abstract fun setCachedUsername(player: UUID, username: String)
+    abstract suspend fun getCachedUsernameAsync(player: UUID): String?
 
     val hikari = createHikari()
     abstract fun createHikari(): HikariDataSource

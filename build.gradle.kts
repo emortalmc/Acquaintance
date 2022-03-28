@@ -21,14 +21,16 @@ dependencies {
     //compileOnly(kotlin("stdlib"))
 
     compileOnly("com.github.Minestom:Minestom:f36304f613")
-    compileOnly("com.github.EmortalMC:Immortal:f8665c96cc")
+    compileOnly("com.github.EmortalMC:Immortal:428b4c7548")
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
     //implementation("redis.clients:jedis:3.7.0")
+    compileOnly("org.redisson:redisson:3.16.8")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+
     compileOnly("mysql:mysql-connector-java:8.0.28")
     compileOnly("com.zaxxer:HikariCP:5.0.1")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
 
     // import kotlinx serialization
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
