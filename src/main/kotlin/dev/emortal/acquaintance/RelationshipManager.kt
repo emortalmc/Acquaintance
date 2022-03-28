@@ -10,7 +10,7 @@ import java.util.*
 object RelationshipManager {
 
     suspend fun UUID.getCachedUsername(): String? = withContext(Dispatchers.IO) {
-        val bucket = redisson.getBucket<String>("${this}username")
+        val bucket = redisson.getBucket<String>("${this@getCachedUsername}username")
         if (bucket.isExists) {
             return@withContext bucket.get()
         }

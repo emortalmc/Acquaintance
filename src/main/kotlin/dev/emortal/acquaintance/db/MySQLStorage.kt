@@ -56,7 +56,7 @@ class MySQLStorage : Storage() {
             val results = statement.executeQuery()
 
             var name: String? = null
-            if (results.first()) name = results.getString(1)
+            if (results.next()) name = results.getString(1)
 
             statement.close()
             conn.close()
