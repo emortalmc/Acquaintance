@@ -27,7 +27,7 @@ dependencies {
 
     //implementation("redis.clients:jedis:3.7.0")
     compileOnly("org.redisson:redisson:3.17.0")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
 
     compileOnly("mysql:mysql-connector-java:8.0.28")
     compileOnly("com.zaxxer:HikariCP:5.0.1")
