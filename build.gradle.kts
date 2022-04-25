@@ -29,7 +29,7 @@ dependencies {
     compileOnly("org.redisson:redisson:3.17.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1")
 
-    compileOnly("mysql:mysql-connector-java:8.0.28")
+    compileOnly("mysql:mysql-connector-java:8.0.29")
     compileOnly("com.zaxxer:HikariCP:5.0.1")
 
     // import kotlinx serialization
@@ -50,7 +50,7 @@ tasks {
         archiveBaseName.set(project.name)
         mergeServiceFiles()
         minimize {
-            exclude(dependency("mysql:mysql-connector-java:8.0.28"))
+            exclude(dependency("mysql:mysql-connector-java:8.0.29"))
         }
     }
 
