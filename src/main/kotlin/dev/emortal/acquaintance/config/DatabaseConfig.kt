@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class DatabaseConfig(
+    val logChat: Boolean = true,
     val redisAddress: String = "redis://172.17.0.1:6379",
     val enabled: Boolean = false,
     val address: String = "172.17.0.1",

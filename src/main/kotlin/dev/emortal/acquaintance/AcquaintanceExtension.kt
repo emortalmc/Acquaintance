@@ -36,7 +36,7 @@ class AcquaintanceExtension : Extension() {
         }
 
         eventNode.listenOnly<PlayerChatEvent> {
-            chatLogger.info("${player.displayName?.plainText() ?: player.username}: $message")
+            if (databaseConfig.logChat) chatLogger.info("${player.displayName?.plainText() ?: player.username}: $message")
         }
 
         logger.info("[Acquaintance] Initialized!")
