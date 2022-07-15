@@ -57,6 +57,10 @@ tasks {
     // Make build depend on shadowJar as shading dependencies will most likely be required.
     build { dependsOn(shadowJar) }
 
+    shadowJar {
+        relocate("com.zaxxer.hikari", "dev.emortal.datadependency.libs.hikari")
+    }
+
 }
 
 java {
