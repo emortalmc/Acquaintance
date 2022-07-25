@@ -26,7 +26,7 @@ dependencies {
     //compileOnly("net.luckperms:api:5.3")
 
     //implementation("redis.clients:jedis:3.7.0")
-    compileOnly("org.redisson:redisson:3.17.4")
+    compileOnly("org.redisson:redisson:3.17.5")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     compileOnly("mysql:mysql-connector-java:8.0.30")
