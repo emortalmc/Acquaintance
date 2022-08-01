@@ -20,8 +20,8 @@ repositories {
 dependencies {
     //compileOnly(kotlin("stdlib"))
 
-    compileOnly("com.github.Minestom:Minestom:f36304f613")
-    compileOnly("com.github.EmortalMC:Immortal:428b4c7548")
+    compileOnly("com.github.Minestom:Minestom:0db5993bfb")
+    compileOnly("com.github.EmortalMC:Immortal:5cdd2d9dd3")
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
