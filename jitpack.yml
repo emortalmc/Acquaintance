@@ -1,4 +1,5 @@
-jdk:
-  - openjdk17
-install:
-  - ./gradlew clean build publishToMavenLocal
+before_install:
+  - source "$HOME/.sdkman/bin/sdkman-init.sh"
+  - sdk update
+  - sdk install java 17-open
+  - sdk use java 17-open
