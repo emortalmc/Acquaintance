@@ -25,7 +25,7 @@ dependencies {
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
-    compileOnly("org.redisson:redisson:3.17.5")
+    compileOnly("org.redisson:redisson:3.17.6")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     compileOnly("mysql:mysql-connector-java:8.0.30")
