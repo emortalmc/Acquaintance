@@ -32,7 +32,7 @@ dependencies {
     compileOnly("com.zaxxer:HikariCP:5.0.1")
 
     // import kotlinx serialization
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 }
 
 // Take gradle.properties and apply it to resources.
