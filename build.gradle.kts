@@ -2,9 +2,9 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
-    id("com.github.johnrengelman.shadow") version "7.1.0"
+    id("org.jetbrains.kotlin.jvm") version "1.7.20"
+    kotlin("plugin.serialization") version "1.7.20"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     `maven-publish`
 
     java
@@ -12,24 +12,21 @@ plugins {
 
 repositories {
     mavenCentral()
-
     maven(url = "https://jitpack.io")
-    maven(url = "https://repo.spongepowered.org/maven")
 }
 
 dependencies {
     //compileOnly(kotlin("stdlib"))
 
-    compileOnly("com.github.Minestom:Minestom:0db5993bfb")
-    compileOnly("com.github.EmortalMC:Immortal:5cdd2d9dd3")
+    compileOnly("com.github.Minestom:Minestom:9dab3183e5")
+    compileOnly("com.github.EmortalMC:Immortal:f347767ee7")
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
-    compileOnly("org.redisson:redisson:3.17.7")
+    compileOnly("redis.clients:jedis:4.3.0")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
-    compileOnly("mysql:mysql-connector-java:8.0.31")
-    compileOnly("com.zaxxer:HikariCP:5.0.1")
+    compileOnly("org.litote.kmongo:kmongo-coroutine-serialization:4.7.1")
 
     // import kotlinx serialization
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
@@ -48,17 +45,11 @@ tasks {
     named<ShadowJar>("shadowJar") {
         archiveBaseName.set(project.name)
         mergeServiceFiles()
-        minimize {
-            exclude(dependency("mysql:mysql-connector-java:8.0.31"))
-        }
+        minimize()
     }
 
     // Make build depend on shadowJar as shading dependencies will most likely be required.
     build { dependsOn(shadowJar) }
-
-    shadowJar {
-        relocate("com.zaxxer.hikari", "dev.emortal.datadependency.libs.hikari")
-    }
 
 }
 

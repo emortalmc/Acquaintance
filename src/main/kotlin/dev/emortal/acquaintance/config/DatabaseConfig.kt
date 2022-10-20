@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 @Serializable
 class DatabaseConfig(
     val logChat: Boolean = true,
+    val logCommands: Boolean = true,
     val redisAddress: String = "redis://172.17.0.1:6379",
     val enabled: Boolean = false,
-    val address: String = "172.17.0.1",
-    val port: String = "3306",
-    val tableName: String = "",
-    val username: String = "",
-    val password: String = ""
+    val mongoAddress: String = "mongodb://172.17.0.1:27017"
+//    val tableName: String = "",
+//    val username: String = "",
+//    val password: String = ""
 )

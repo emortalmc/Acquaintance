@@ -1,25 +1,22 @@
 package dev.emortal.acquaintance
 
-import dev.emortal.acquaintance.util.RedisStorage
-import dev.emortal.acquaintance.util.RedisStorage.redisson
+import dev.emortal.acquaintance.util.JedisStorage.jedis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.minestom.server.entity.Player
-import java.util.*
 
 object RelationshipManager {
 
-    suspend fun UUID.getCachedUsername(): String? = withContext(Dispatchers.IO) {
-        val bucket = redisson.getBucket<String>("${this@getCachedUsername}username")
-        if (bucket.isExists) {
-            return@withContext bucket.get()
+    suspend fun String.getCachedUsername(): String? = withContext(Dispatchers.IO) {
+        val bucket = jedis.get("${this@getCachedUsername}username")
+        if (bucket != null) {
+            return@withContext bucket
         }
 
         AcquaintanceExtension.storage?.getCachedUsernameAsync(this@getCachedUsername)
     }
 
-    suspend fun Player.getFriendsAsync(): List<UUID> = withContext(Dispatchers.IO) {
-        return@withContext redisson.getList<UUID>("${uuid}friends").readAllAsync().get()
-    }
+//    suspend fun Player.getFriendsAsync(): List<UUID> = withContext(Dispatchers.IO) {
+//        return@withContext redisson.getList<UUID>("${uuid}friends").readAllAsync().get()
+//    }
 
 }

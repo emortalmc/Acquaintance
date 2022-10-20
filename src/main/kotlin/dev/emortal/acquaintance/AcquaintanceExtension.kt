@@ -1,7 +1,7 @@
 package dev.emortal.acquaintance
 
 import dev.emortal.acquaintance.config.DatabaseConfig
-import dev.emortal.acquaintance.db.MySQLStorage
+import dev.emortal.acquaintance.db.MongoStorage
 import dev.emortal.acquaintance.db.Storage
 import dev.emortal.immortal.config.ConfigHelper
 import net.minestom.server.event.Event
@@ -27,18 +27,23 @@ class AcquaintanceExtension : Extension() {
             databaseConfig = ConfigHelper.initConfigFile(databaseConfigPath, databaseConfig)
 
             if (databaseConfig.enabled) {
-                storage = MySQLStorage()
+                storage = MongoStorage()
+                storage?.init()
             }
 
             val chatLogger = LoggerFactory.getLogger("Chat")
             val commandLogger = LoggerFactory.getLogger("Command")
 
-            eventNode.listenOnly<PlayerCommandEvent> {
-                commandLogger.info("${player.displayName?.plainText() ?: player.username} ran command: $command")
+            if (databaseConfig.logCommands) {
+                eventNode.listenOnly<PlayerCommandEvent> {
+                    commandLogger.info("${player.displayName?.plainText() ?: player.username} ran command: $command")
+                }
             }
 
-            eventNode.listenOnly<PlayerChatEvent> {
-                if (databaseConfig.logChat) chatLogger.info("${player.displayName?.plainText() ?: player.username}: $message")
+            if (databaseConfig.logChat) {
+                eventNode.listenOnly<PlayerChatEvent> {
+                    chatLogger.info("${player.displayName?.plainText() ?: player.username}: $message")
+                }
             }
 
             Logger.info("[Acquaintance] Initialized!")

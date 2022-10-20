@@ -1,5 +1,5 @@
 package dev.emortal.acquaintance.db
-
+/*
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import dev.emortal.acquaintance.AcquaintanceExtension
@@ -100,4 +100,4 @@ class MySQLStorage : Storage() {
         }
         return null
     }
-}
+}*/
