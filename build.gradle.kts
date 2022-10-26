@@ -18,12 +18,12 @@ repositories {
 dependencies {
     //compileOnly(kotlin("stdlib"))
 
-    compileOnly("com.github.Minestom:Minestom:9dab3183e5")
+    compileOnly("com.github.Minestom:Minestom:d7e958fa07")
     compileOnly("com.github.EmortalMC:Immortal:f347767ee7")
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
-    compileOnly("redis.clients:jedis:4.3.0")
+    compileOnly("redis.clients:jedis:4.3.1")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
     compileOnly("org.litote.kmongo:kmongo-coroutine-serialization:4.7.1")
