@@ -9,7 +9,4 @@ class DatabaseConfig(
     val redisAddress: String = "redis://172.17.0.1:6379",
     val enabled: Boolean = false,
     val mongoAddress: String = "mongodb://172.17.0.1:27017"
-//    val tableName: String = "",
-//    val username: String = "",
-//    val password: String = ""
 )

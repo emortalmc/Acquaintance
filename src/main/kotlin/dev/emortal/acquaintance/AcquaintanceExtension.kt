@@ -24,11 +24,12 @@ class AcquaintanceExtension : Extension() {
         var storage: Storage? = null
 
         fun init(eventNode: EventNode<Event>) {
+
             databaseConfig = ConfigHelper.initConfigFile(databaseConfigPath, databaseConfig)
 
             if (databaseConfig.enabled) {
                 storage = MongoStorage()
-                storage?.init()
+                storage!!.init()
             }
 
             val chatLogger = LoggerFactory.getLogger("Chat")
@@ -55,7 +56,7 @@ class AcquaintanceExtension : Extension() {
     }
 
     override fun terminate() {
-        logger.info("[Acquaintance] Terminated!")
+        Logger.info("[Acquaintance] Terminated!")
     }
 
 }
