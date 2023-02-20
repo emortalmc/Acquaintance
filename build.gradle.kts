@@ -19,7 +19,7 @@ dependencies {
     //compileOnly(kotlin("stdlib"))
 
     compileOnly("com.github.hollow-cube:Minestom:e6d4a2cc91")
-    compileOnly("com.github.EmortalMC:Immortal:bb0a38dc47")
+    compileOnly("com.github.EmortalMC:Immortal:2.0.0")
     //compileOnly("com.github.emortaldev:Kstom:def1719826")
     //compileOnly("net.luckperms:api:5.3")
 
