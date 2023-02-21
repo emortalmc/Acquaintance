@@ -6,9 +6,6 @@ import dev.emortal.acquaintance.db.Storage
 import dev.emortal.immortal.config.ConfigHelper
 import net.minestom.server.event.Event
 import net.minestom.server.event.EventNode
-import net.minestom.server.event.player.PlayerChatEvent
-import net.minestom.server.event.player.PlayerCommandEvent
-import org.slf4j.LoggerFactory
 import java.nio.file.Path
 
 class AcquaintanceExtension {

@@ -1,5 +1,6 @@
 package dev.emortal.acquaintance
 
+import dev.emortal.acquaintance.RelationshipManager.getCachedUsername
 import dev.emortal.acquaintance.util.JedisStorage.jedis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,6 +15,9 @@ object RelationshipManager {
         }
 
         AcquaintanceExtension.storage?.getCachedUsername(UUID.fromString(this@getCachedUsername))
+    }
+    fun String.setCachedUsername(newUsername: String) {
+        jedis.set("${this@setCachedUsername}username", newUsername)
     }
 
 //    suspend fun Player.getFriendsAsync(): List<UUID> = withContext(Dispatchers.IO) {
