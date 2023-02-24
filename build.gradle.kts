@@ -29,7 +29,7 @@ dependencies {
     compileOnly("org.litote.kmongo:kmongo-coroutine-serialization:4.8.0")
 
     // import kotlinx serialization
-    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
 }
 
 // Take gradle.properties and apply it to resources.
