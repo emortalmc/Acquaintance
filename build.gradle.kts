@@ -26,7 +26,7 @@ dependencies {
     compileOnly("redis.clients:jedis:4.3.2")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
 
-    compileOnly("org.litote.kmongo:kmongo-coroutine-serialization:4.8.0")
+    compileOnly("org.litote.kmongo:kmongo-coroutine-serialization:4.9.0")
 
     // import kotlinx serialization
     compileOnly("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
