@@ -24,7 +24,7 @@ dependencies {
     //compileOnly("net.luckperms:api:5.3")
 
     compileOnly("redis.clients:jedis:4.3.2")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.0")
 
     compileOnly("org.litote.kmongo:kmongo-coroutine-serialization:4.9.0")
 
